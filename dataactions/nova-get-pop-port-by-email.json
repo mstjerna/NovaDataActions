@@ -7,7 +7,9 @@
       "requestUrlTemplate": "https://gcapi.alektumgroup.com/Service/novaPopPort/${input.userEmail}",
       "requestType": "GET",
       "headers": {
-        "Accept": "application/json"
+        "Accept": "application/json",
+        "Authorization": "${authResponse.token_type} ${authResponse.access_token}",
+        "scope": "${credentials.scope}"
       }
     },
     "response": {
@@ -15,7 +17,7 @@
         "successValue": "$.success",
         "portValue": "$.data",
         "messageValue": "$.message",
-        "errorsValue": "$.errors"
+        "errorsValue": "$.errors[*]"
       },
       "translationMapDefaults": {
         "successValue": "false",
@@ -42,7 +44,7 @@
         "required": [
           "userEmail"
         ],
-        "additionalProperties": false
+        "additionalProperties": true
       }
     },
     "output": {
