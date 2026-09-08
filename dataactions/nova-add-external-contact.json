@@ -1,0 +1,97 @@
+{
+  "name": "Nova - Add External Contact",
+  "integrationType": "custom-rest-actions",
+  "actionType": "custom",
+  "config": {
+    "request": {
+      "requestUrlTemplate": "https://gcapi.alektumgroup.com/Service/AddExternalContact",
+      "requestType": "POST",
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "${authResponse.token_type} ${authResponse.access_token}",
+        "scope": "${credentials.scope}"
+      },
+      "requestTemplate": "{\n\"debtorNo\": ${input.debtorNo},\n\"divisionId\": \"$!esc.jsonString($!{input.divisionId})\",\n\"genesysContactId\": \"$!esc.jsonString($!{input.genesysContactId})\",\n\"site\": \"$!esc.jsonString($!{input.site})\"\n}\n"
+    },
+    "response": {
+      "translationMap": {
+        "successValue": "$.success",
+        "dataValue": "$.data",
+        "messageValue": "$.message",
+        "errorsValue": "$.errors[*]"
+      },
+      "translationMapDefaults": {
+        "successValue": "false",
+        "dataValue": "false",
+        "messageValue": "\"UNKNOWN\"",
+        "errorsValue": "[]"
+      },
+      "successTemplate": "{\"success\" : ${successValue}, \"data\" : ${dataValue}, \"message\" : ${messageValue}, \"errors\" : ${errorsValue} }"
+    }
+  },
+  "contract": {
+    "input": {
+      "inputSchema": {
+        "title": "input",
+        "description": "Input for adding a Genesys external contact reference to a Nova debtor.",
+        "type": "object",
+        "required": [
+          "debtorNo",
+          "divisionId",
+          "genesysContactId",
+          "site"
+        ],
+        "properties": {
+          "debtorNo": {
+            "type": "integer",
+            "description": "The Nova debtor number."
+          },
+          "divisionId": {
+            "type": "string",
+            "description": "The Nova division id."
+          },
+          "genesysContactId": {
+            "type": "string",
+            "description": "The Genesys Cloud external contact id to link to the debtor."
+          },
+          "site": {
+            "type": "string",
+            "description": "The Nova site / country code."
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "output": {
+      "successSchema": {
+        "title": "output",
+        "description": "Result of the add external contact call.",
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "True when the call succeeded."
+          },
+          "data": {
+            "type": "boolean",
+            "description": "True when the external contact was added. False when no result was returned (HTTP 204)."
+          },
+          "message": {
+            "type": "string",
+            "description": "Optional message returned by the API."
+          },
+          "errors": {
+            "type": "array",
+            "description": "Any errors returned by the API.",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "secure": false
+}
