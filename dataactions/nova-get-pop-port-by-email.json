@@ -1,0 +1,81 @@
+{
+  "name": "Nova - Get POP Port by Agent Email",
+  "integrationType": "custom-rest-actions",
+  "actionType": "custom",
+  "config": {
+    "request": {
+      "requestUrlTemplate": "https://gcapi.alektumgroup.com/Service/novaPopPort/${input.userEmail}",
+      "requestType": "GET",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "requestTemplate": "${input.rawRequest}"
+    },
+    "response": {
+      "translationMap": {
+        "successValue": "$.success",
+        "portValue": "$.data",
+        "messageValue": "$.message",
+        "errorsValue": "$.errors"
+      },
+      "translationMapDefaults": {
+        "successValue": "false",
+        "portValue": "0",
+        "messageValue": "\"\"",
+        "errorsValue": "[]"
+      },
+      "successTemplate": "{\n  \"success\": ${successValue},\n  \"port\": ${portValue},\n  \"message\": ${messageValue},\n  \"errors\": ${errorsValue}\n}"
+    }
+  },
+  "contract": {
+    "input": {
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "title": "NovaPopPortRequest",
+        "description": "Input for looking up the Nova POP port for an agent.",
+        "type": "object",
+        "properties": {
+          "userEmail": {
+            "type": "string",
+            "description": "The agent's email address, e.g. agent@alektumgroup.com"
+          }
+        },
+        "required": [
+          "userEmail"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "output": {
+      "successSchema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "title": "NovaPopPortResponse",
+        "description": "The Nova POP port assigned to the agent.",
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "True when the lookup succeeded."
+          },
+          "port": {
+            "type": "integer",
+            "description": "The Nova POP port number for the agent. 0 when no result was returned (HTTP 204)."
+          },
+          "message": {
+            "type": "string",
+            "description": "Optional message returned by the API."
+          },
+          "errors": {
+            "type": "array",
+            "description": "Any errors returned by the API.",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "secure": false
+}
