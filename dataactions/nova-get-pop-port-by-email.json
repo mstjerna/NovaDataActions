@@ -11,7 +11,7 @@
         "Authorization": "${authResponse.token_type} ${authResponse.access_token}",
         "scope": "${credentials.scope}"
       },
-      "requestTemplate": "${input.rawRequest}"
+      "requestTemplate": "{\n\"userEmail\": \"$!esc.jsonString($!{input.userEmail})\"\n}\n"
     },
     "response": {
       "translationMap": {
@@ -23,53 +23,43 @@
       "translationMapDefaults": {
         "successValue": "false",
         "portValue": "0",
-        "messageValue": "\"\"",
+        "messageValue": "\"UNKNOWN\"",
         "errorsValue": "[]"
       },
-      "successTemplate": "{\n  \"success\": ${successValue},\n  \"port\": ${portValue},\n  \"message\": ${messageValue},\n  \"errors\": ${errorsValue}\n}"
+      "successTemplate": "{\"success\" : ${successValue}, \"port\" : ${portValue}, \"message\" : ${messageValue}, \"errors\" : ${errorsValue} }"
     }
   },
   "contract": {
     "input": {
       "inputSchema": {
-        "$schema": "http://json-schema.org/draft-04/schema#",
-        "title": "NovaPopPortRequest",
-        "description": "Input for looking up the Nova POP port for an agent.",
+        "title": "input",
         "type": "object",
-        "properties": {
-          "userEmail": {
-            "type": "string",
-            "description": "The agent's email address, e.g. agent@alektumgroup.com"
-          }
-        },
         "required": [
           "userEmail"
         ],
+        "properties": {
+          "userEmail": {
+            "type": "string"
+          }
+        },
         "additionalProperties": true
       }
     },
     "output": {
       "successSchema": {
-        "$schema": "http://json-schema.org/draft-04/schema#",
-        "title": "NovaPopPortResponse",
-        "description": "The Nova POP port assigned to the agent.",
         "type": "object",
         "properties": {
           "success": {
-            "type": "boolean",
-            "description": "True when the lookup succeeded."
+            "type": "boolean"
           },
           "port": {
-            "type": "integer",
-            "description": "The Nova POP port number for the agent. 0 when no result was returned (HTTP 204)."
+            "type": "integer"
           },
           "message": {
-            "type": "string",
-            "description": "Optional message returned by the API."
+            "type": "string"
           },
           "errors": {
             "type": "array",
-            "description": "Any errors returned by the API.",
             "items": {
               "type": "string"
             }
