@@ -8,8 +8,7 @@
       "requestType": "GET",
       "headers": {
         "Accept": "application/json"
-      },
-      "requestTemplate": "${input.rawRequest}"
+      }
     },
     "response": {
       "translationMap": {
