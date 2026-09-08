@@ -10,7 +10,8 @@
         "Accept": "application/json",
         "Authorization": "${authResponse.token_type} ${authResponse.access_token}",
         "scope": "${credentials.scope}"
-      }
+      },
+      "requestTemplate": "${input.rawRequest}"
     },
     "response": {
       "translationMap": {
