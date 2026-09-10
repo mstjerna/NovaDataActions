@@ -1,0 +1,92 @@
+{
+  "name": "Nova - Update Nova Email",
+  "integrationType": "custom-rest-actions",
+  "actionType": "custom",
+  "config": {
+    "request": {
+      "requestUrlTemplate": "https://gcapi.alektumgroup.com/Service/UpdateNovaEmail",
+      "requestType": "POST",
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "${authResponse.token_type} ${authResponse.access_token}",
+        "scope": "${credentials.scope}"
+      },
+      "requestTemplate": "{\n\"debtorNo\": ${input.debtorNo},\n\"site\": \"$!esc.jsonString($!{input.site})\",\n\"email\": \"$!esc.jsonString($!{input.email})\"\n}"
+    },
+    "response": {
+      "translationMap": {
+        "successValue": "$.success",
+        "dataValue": "$.data",
+        "messageValue": "$.message",
+        "errorsValue": "$.errors[*]"
+      },
+      "translationMapDefaults": {
+        "successValue": "false",
+        "dataValue": "false",
+        "messageValue": "\"UNKNOWN\"",
+        "errorsValue": "[]"
+      },
+      "successTemplate": "{\"success\" : ${successValue}, \"data\" : ${dataValue}, \"message\" : ${messageValue}, \"errors\" : ${errorsValue} }"
+    }
+  },
+  "contract": {
+    "input": {
+      "inputSchema": {
+        "title": "input",
+        "description": "Input for updating the email address stored on a Nova debtor.",
+        "type": "object",
+        "required": [
+          "debtorNo",
+          "site",
+          "email"
+        ],
+        "properties": {
+          "debtorNo": {
+            "type": "integer",
+            "description": "The Nova debtor number."
+          },
+          "site": {
+            "type": "string",
+            "description": "The Nova site / country code."
+          },
+          "email": {
+            "type": "string",
+            "description": "The email address to store on the debtor."
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "output": {
+      "successSchema": {
+        "title": "output",
+        "description": "Result of the update email call.",
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "True when the call succeeded."
+          },
+          "data": {
+            "type": "boolean",
+            "description": "True when the email was updated. False when no result was returned (HTTP 204)."
+          },
+          "message": {
+            "type": "string",
+            "description": "Optional message returned by the API."
+          },
+          "errors": {
+            "type": "array",
+            "description": "Any errors returned by the API.",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "secure": false
+}
