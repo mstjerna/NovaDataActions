@@ -1,0 +1,87 @@
+{
+  "name": "Nova - Update Nova POP",
+  "integrationType": "custom-rest-actions",
+  "actionType": "custom",
+  "config": {
+    "request": {
+      "requestUrlTemplate": "https://gcapi.alektumgroup.com/NovaPop/UpdateNovaPop",
+      "requestType": "POST",
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "${authResponse.token_type} ${authResponse.access_token}",
+        "scope": "${credentials.scope}"
+      },
+      "requestTemplate": "{\n\"conversationId\": \"$!esc.jsonString($!{input.conversationId})\",\n\"email\": \"$!esc.jsonString($!{input.email})\"\n}"
+    },
+    "response": {
+      "translationMap": {
+        "successValue": "$.success",
+        "dataValue": "$.data",
+        "messageValue": "$.message",
+        "errorsValue": "$.errors[*]"
+      },
+      "translationMapDefaults": {
+        "successValue": "false",
+        "dataValue": "false",
+        "messageValue": "\"UNKNOWN\"",
+        "errorsValue": "[]"
+      },
+      "successTemplate": "{\"success\" : ${successValue}, \"data\" : ${dataValue}, \"message\" : ${messageValue}, \"errors\" : ${errorsValue} }"
+    }
+  },
+  "contract": {
+    "input": {
+      "inputSchema": {
+        "title": "input",
+        "description": "Input for triggering a Nova POP update for an agent on a conversation.",
+        "type": "object",
+        "required": [
+          "conversationId",
+          "email"
+        ],
+        "properties": {
+          "conversationId": {
+            "type": "string",
+            "description": "The Genesys Cloud conversation id."
+          },
+          "email": {
+            "type": "string",
+            "description": "The agent's email address."
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "output": {
+      "successSchema": {
+        "title": "output",
+        "description": "Result of the Nova POP update call.",
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "True when the call succeeded."
+          },
+          "data": {
+            "type": "boolean",
+            "description": "True when the Nova POP was updated. False when no result was returned (HTTP 204)."
+          },
+          "message": {
+            "type": "string",
+            "description": "Optional message returned by the API."
+          },
+          "errors": {
+            "type": "array",
+            "description": "Any errors returned by the API.",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "secure": false
+}
