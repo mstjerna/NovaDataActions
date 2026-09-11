@@ -8,6 +8,8 @@ Genesys Cloud **Web Services Data Actions** for Nova / `gcapi.alektumgroup.com` 
 | --- | --- | --- |
 | [`dataactions/nova-get-pop-port-by-email.json`](dataactions/nova-get-pop-port-by-email.json) | Nova - Get POP Port by Agent Email | `GET /Service/novaPopPort/{userEmail}` |
 | [`dataactions/nova-add-external-contact.json`](dataactions/nova-add-external-contact.json) | Nova - Add External Contact | `POST /Service/AddExternalContact` |
+| [`dataactions/nova-update-nova-email.json`](dataactions/nova-update-nova-email.json) | Nova - Update Nova Email | `POST /Service/UpdateNovaEmail` |
+| [`dataactions/nova-update-nova-pop.json`](dataactions/nova-update-nova-pop.json) | Nova - Update Nova POP | `POST /NovaPop/UpdateNovaPop` |
 
 ---
 
@@ -212,3 +214,206 @@ timeouts without first confirming the current state in Nova.
 4. Reference the action from an Architect flow with a **Call Data Action** block, mapping
    the resolved debtor details and the external contact id (e.g. the contact id from a
    *Create External Contact* step) to the inputs.
+
+---
+
+## Nova - Update Nova Email
+
+Updates the email address stored on a Nova debtor.
+
+### Request
+
+```
+POST https://gcapi.alektumgroup.com/Service/UpdateNovaEmail
+Accept: application/json
+Content-Type: application/json
+Authorization: ${authResponse.token_type} ${authResponse.access_token}
+scope: ${credentials.scope}
+```
+
+Body:
+
+```json
+{
+  "debtorNo": 123456,
+  "site": "SE",
+  "email": "debtor@example.com"
+}
+```
+
+String inputs are wrapped in `$!esc.jsonString(...)` in the `requestTemplate`, so quotes
+and other special characters in the input values cannot break the JSON body. Do not
+pre-escape the inputs. `debtorNo` is substituted unquoted because it is an integer.
+
+### Input contract
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `debtorNo` | integer | yes | The Nova debtor number |
+| `site` | string | yes | The Nova site / country code |
+| `email` | string | yes | The email address to store on the debtor |
+
+```json
+{
+  "debtorNo": 123456,
+  "site": "SE",
+  "email": "debtor@example.com"
+}
+```
+
+### Output contract
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `success` | boolean | True when the call succeeded |
+| `data` | boolean | True when the email was updated. `false` when no result was returned (HTTP 204) |
+| `message` | string | Optional message returned by the API |
+| `errors` | array of string | Any errors returned by the API |
+
+```json
+{
+  "success": true,
+  "data": true,
+  "message": "",
+  "errors": []
+}
+```
+
+### Response handling
+
+The upstream API uses the same envelope as the other Nova actions:
+
+```json
+{
+  "success": true,
+  "data": true,
+  "message": "string",
+  "errors": ["string"]
+}
+```
+
+`translationMapDefaults` cover the **HTTP 204** case (request accepted but no body
+returned): the action still completes successfully with `success: false`, `data: false`,
+`message: "UNKNOWN"` and an empty `errors` array. Always check `success` **and** `data` in
+your flow before treating the update as applied — a 204 is not a confirmation.
+
+**HTTP 401** means the integration credentials are missing or invalid — the data action
+will fail and the failure branch in the flow will be taken.
+
+### Prerequisites
+
+1. A **Web Services Data Actions** integration in Genesys Cloud (Admin > Integrations),
+   active and configured with credentials for `gcapi.alektumgroup.com`.
+2. The integration must be configured with **User Defined (OAuth)** credentials, since the
+   definition references `${authResponse.token_type}`, `${authResponse.access_token}` and
+   `${credentials.scope}`. Make sure a `scope` field exists in the integration credentials.
+
+### Import
+
+1. Admin > Integrations > **Actions**.
+2. **Add Action** > select your Web Services Data Actions integration > **Import** and
+   choose `dataactions/nova-update-nova-email.json`.
+3. Open the **Test** tab, run it against a known test debtor, then **Save & Publish**.
+4. Reference the action from an Architect flow with a **Call Data Action** block, mapping
+   the debtor id and updated email to the inputs.
+
+---
+
+## Nova - Update Nova POP
+
+Triggers a Nova POP (screen pop) update for an agent on a conversation.
+This action uses the `/NovaPop/...` base path, unlike the other actions that use `/Service/...`.
+
+### Request
+
+```
+POST https://gcapi.alektumgroup.com/NovaPop/UpdateNovaPop
+Accept: application/json
+Content-Type: application/json
+Authorization: ${authResponse.token_type} ${authResponse.access_token}
+scope: ${credentials.scope}
+```
+
+Body:
+
+```json
+{
+  "conversationId": "b1f2c3d4-5678-90ab-cdef-1234567890ab",
+  "email": "agent@alektumgroup.com"
+}
+```
+
+String inputs are wrapped in `$!esc.jsonString(...)` in the `requestTemplate`, so quotes
+and other special characters in the input values cannot break the JSON body. Do not
+pre-escape the inputs.
+
+### Input contract
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `conversationId` | string | yes | The Genesys Cloud conversation id |
+| `email` | string | yes | The agent's email address |
+
+```json
+{
+  "conversationId": "b1f2c3d4-5678-90ab-cdef-1234567890ab",
+  "email": "agent@alektumgroup.com"
+}
+```
+
+### Output contract
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `success` | boolean | True when the call succeeded |
+| `data` | boolean | True when the Nova POP was updated. `false` when no result was returned (HTTP 204) |
+| `message` | string | Optional message returned by the API |
+| `errors` | array of string | Any errors returned by the API |
+
+```json
+{
+  "success": true,
+  "data": true,
+  "message": "",
+  "errors": []
+}
+```
+
+### Response handling
+
+The upstream API uses the same envelope as the other Nova actions:
+
+```json
+{
+  "success": true,
+  "data": true,
+  "message": "string",
+  "errors": ["string"]
+}
+```
+
+`translationMapDefaults` cover the **HTTP 204** case (request accepted but no body
+returned): the action still completes successfully with `success: false`, `data: false`,
+`message: "UNKNOWN"` and an empty `errors` array. Always check `success` **and** `data` in
+your flow before treating the update as applied — a 204 is not a confirmation.
+
+**HTTP 401** means the integration credentials are missing or invalid — the data action
+will fail and the failure branch in the flow will be taken.
+
+### Prerequisites
+
+1. A **Web Services Data Actions** integration in Genesys Cloud (Admin > Integrations),
+   active and configured with credentials for `gcapi.alektumgroup.com`.
+2. The integration must be configured with **User Defined (OAuth)** credentials, since the
+   definition references `${authResponse.token_type}`, `${authResponse.access_token}` and
+   `${credentials.scope}`. Make sure a `scope` field exists in the integration credentials.
+
+### Import
+
+1. Admin > Integrations > **Actions**.
+2. **Add Action** > select your Web Services Data Actions integration > **Import** and
+   choose `dataactions/nova-update-nova-pop.json`.
+3. Open the **Test** tab, run it with a real conversation id and agent email, then
+   **Save & Publish**.
+4. Reference the action from an Architect flow with a **Call Data Action** block, mapping
+   the conversation id and agent email to the inputs.
